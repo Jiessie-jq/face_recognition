@@ -1,0 +1,6 @@
+my_data/*
+*/*pycache*/*
+*.txt
+*.csv
+model_save/*
+create_trainfile.py
