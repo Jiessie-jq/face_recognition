@@ -17,7 +17,7 @@ configs = {
     "learning_rate_gamma": 0.1,
     "num_epoch": 10,
     # ------------ Model Configuration ------------
-    "use_stn": True,
+    "use_stn": False,
     "backbone": "resnet18",
     "output_head": "bn_dropout_gap_fc_bn",
     "feature_dim": 512,

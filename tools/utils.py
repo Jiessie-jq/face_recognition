@@ -64,8 +64,8 @@ def try_load_latest_checkpoint(model, base_dir):
         epoch = 0
         # mge.module.init.fill_(model.stn.fc1.weight, 0)
         # mge.module.init.fill_(model.stn.fc1.bias, 0)
-        mge.module.init.fill_(model.stn.fc2.weight, 0)
-        mge.module.init.fill_(model.stn.fc2.bias, [1,0,0,0,1,0,0,0,1])
+        # mge.module.init.fill_(model.stn.fc2.weight, 0)
+        # mge.module.init.fill_(model.stn.fc2.bias, [1,0,0,0,1,0,0,0,1])
     return model, epoch
 
 

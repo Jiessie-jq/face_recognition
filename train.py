@@ -3,6 +3,7 @@ import bisect
 import multiprocessing as mp
 import os
 import time
+import math
 
 import megengine as mge
 import megengine.autodiff as ad
@@ -35,6 +36,23 @@ def adjust_learning_rate(opt, epoch, configs):
         logger.info(f"epoch {epoch}, using learning rate {base_lr:.3g}")
     for param_group in opt.param_groups:
         param_group["lr"] = base_lr
+
+def cosine_learning_rate(opt, epoch, configs):
+    T_0 = 15
+    if epoch > 15:
+        epoch_1 = 0
+    else:
+        epoch_1 = epoch
+    base_lr = configs["learning_rate"] * (1+math.cos(math.pi*epoch_1/T_0))/2
+    backbone_lr = 1e-3 * (1+math.cos(math.pi*epoch_1/T_0))/2
+    if dist.get_rank() == 0:
+        logger.info(f"epoch {epoch}, using learning rate {base_lr:.3g}")
+    opt.param_groups[0]["lr"] = backbone_lr
+    for param_group in opt.param_groups[1:]:
+        # print(param_group)
+        param_group["lr"] = base_lr
+
+
 
 
 def main(args):
@@ -95,15 +113,13 @@ def worker(master_ip, port, world_size, rank, configs):
     opt = optim.SGD(
         [
             {'params':model.backbone.parameters(), 'lr':1e-5},
-            {'params':model.head.parameters(), 'lr':configs["learning_rate"]},
-            {'params':model.stn.parameters(), 'lr':1e-3}
+            # {'params':model.stn.parameters(), 'lr':1e-3}
 
         ],
-        lr = 0.05, 
         # model.parameters(),
-        # lr=configs["learning_rate"],
-        # momentum=configs["momentum"],
-        # weight_decay=configs["weight_decay"],
+        lr=configs["learning_rate"],
+        momentum=configs["momentum"],
+        weight_decay=configs["weight_decay"],
     )
 
     # try to load checkpoint
@@ -122,7 +138,6 @@ def worker(master_ip, port, world_size, rank, configs):
                     accuracy = dist.functional.all_reduce_sum(accuracy) / dist.get_world_size()
             opt.step()
             return loss, accuracy
-        print(model.stn.fc2.weight, model.stn.fc2.bias)
         model.train()
 
         average_loss = AverageMeter("loss")
@@ -163,7 +178,7 @@ def worker(master_ip, port, world_size, rank, configs):
                 )
 
     for epoch in range(start_epoch, configs["num_epoch"]):
-        adjust_learning_rate(opt, epoch, configs)
+        cosine_learning_rate(opt, epoch, configs)
         train_one_epoch()
         # print(dist.get_rank())
         if dist.get_rank() == 0:
@@ -177,6 +192,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--config-file", help="path to experiment configuration", required=True)
     args = parser.parse_args()
-    # configs = load_config_from_path(args.config_file)
-    # model = FaceRecognitionModel(configs)
     main(args)
