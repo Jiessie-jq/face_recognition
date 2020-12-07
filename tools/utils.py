@@ -47,18 +47,25 @@ def try_load_latest_checkpoint(model, base_dir):
     latest_epoch = -1
     for ckpt_path in os.listdir(base_dir):
         r = re.match(r"epoch-(\d+)-checkpoint\.pkl", ckpt_path)
-        # if r is not None:
-        #     latest_epoch = max(latest_epoch, int(r.group(1)))
+        if r is not None:
+            latest_epoch = max(latest_epoch, int(r.group(1)))
 
     # load checkpoint
     if latest_epoch != -1:
         checkpoint_path = os.path.join(base_dir, f"epoch-{latest_epoch}-checkpoint.pkl")
         checkpoint_data = mge.load(checkpoint_path)
         epoch = checkpoint_data["epoch"]
-        model.load_state_dict(checkpoint_data["state_dict"])
+        for name, param in model.state_dict().items():
+            if name not in checkpoint_data["state_dict"]:
+                continue
+            param = checkpoint_data["state_dict"][name]
+
     else:
         epoch = 0
-
+        # mge.module.init.fill_(model.stn.fc1.weight, 0)
+        # mge.module.init.fill_(model.stn.fc1.bias, 0)
+        mge.module.init.fill_(model.stn.fc2.weight, 0)
+        mge.module.init.fill_(model.stn.fc2.bias, [1,0,0,0,1,0,0,0,1])
     return model, epoch
 
 

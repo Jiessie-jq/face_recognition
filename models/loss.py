@@ -131,6 +131,7 @@ def get_loss(name):
     mapping = {
         "cosface": AdditiveMarginSoftmax,
         "arcface": AdditiveAngularMarginSoftmax,
+        "combinall": CombinSoftmax,
     }
     assert name in mapping, f"head {name} is not found, choose one from {mapping.keys()}"
     return mapping[name]

@@ -3,7 +3,7 @@ configs = {
     "batch_size": 64,
     "input_size": [112, 112],
     # ------------ Training Configuration ------------
-    "learning_rate": 0.1 / 8,
+    "learning_rate": 1e-3,
     "momentum": 0.9,
     "weight_decay": 5e-4,
     # ------------ IO Configuration ------------

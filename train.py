@@ -88,12 +88,15 @@ def worker(master_ip, port, world_size, rank, configs):
     if dist.get_world_size() > 1:
         dist.bcast_list_(model.parameters())
         gm = ad.GradManager().attach(model.parameters(), callbacks=[dist.make_allreduce_cb("mean")])
+
     else:
         gm = ad.GradManager().attach(model.parameters())
+        print(model.parameters())
     opt = optim.SGD(
         [
             {'params':model.backbone.parameters(), 'lr':1e-5},
-            {'params':model.head.parameters(), 'lr':configs["learning_rate"]}
+            {'params':model.head.parameters(), 'lr':configs["learning_rate"]},
+            {'params':model.stn.parameters(), 'lr':1e-3}
 
         ],
         lr = 0.05, 
@@ -119,7 +122,7 @@ def worker(master_ip, port, world_size, rank, configs):
                     accuracy = dist.functional.all_reduce_sum(accuracy) / dist.get_world_size()
             opt.step()
             return loss, accuracy
-
+        print(model.stn.fc2.weight, model.stn.fc2.bias)
         model.train()
 
         average_loss = AverageMeter("loss")
@@ -174,5 +177,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--config-file", help="path to experiment configuration", required=True)
     args = parser.parse_args()
-
+    # configs = load_config_from_path(args.config_file)
+    # model = FaceRecognitionModel(configs)
     main(args)

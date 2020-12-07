@@ -9,15 +9,15 @@ configs = {
     # ------------ IO Configuration ------------
     "base_dir": "/OCR/face_recognition/model_save/v0.1",
     "dataset_dir": "/OCR/face_recognition/full_data.csv",
-    "log_interval": 200,
+    "log_interval": 50,
     # ------------ Dataset Configuration ------------
-    "dataset": "dummy",
+    "dataset": "mydata",
     "num_class": 7,
     "learning_rate_milestons": [3],
     "learning_rate_gamma": 0.1,
     "num_epoch": 10,
     # ------------ Model Configuration ------------
-    "use_stn": False,
+    "use_stn": True,
     "backbone": "resnet18",
     "output_head": "bn_dropout_gap_fc_bn",
     "feature_dim": 512,
@@ -32,9 +32,9 @@ configs = {
     # "loss_m1": 1,
     # "loss_m2": 0,
     # "loss_m3": 0.35,
-    "loss_type": "arcface",
+    "loss_type": "combinall",
     "loss_scale": 30,
     "loss_m1": 1,
     "loss_m2": 0.5,
-    "loss_m3": 0,
+    "loss_m3": 0.4,
 }
